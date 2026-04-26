@@ -1,0 +1,28 @@
+name: Update formula on release
+
+on:
+  repository_dispatch:
+    types: [new-release]
+
+jobs:
+  update-formula:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update formula version, url, sha256
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+          SHA256: ${{ github.event.client_payload.sha256 }}
+        run: |
+          sed -i "s|url \".*\"|url \"https://github.com/clickbrain/vllm-mlx-ui/archive/refs/tags/v${VERSION}.tar.gz\"|" Formula/vllm-mlx-ui.rb
+          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Formula/vllm-mlx-ui.rb
+          sed -i "s|version \".*\"|version \"${VERSION}\"|" Formula/vllm-mlx-ui.rb
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/vllm-mlx-ui.rb
+          git commit -m "chore: update formula to v${{ github.event.client_payload.version }}"
+          git push
