@@ -15,9 +15,9 @@ class VllmMlxUi < Formula
   homepage "https://github.com/clickbrain/vllm-mlx-ui"
 
   # Stable release — brew upgrade works normally with this URL.
-  url "https://github.com/clickbrain/vllm-mlx-ui/archive/refs/tags/v0.3.39.tar.gz"
-  sha256 "2f7de7726ef6b4389efb41ea71fba36fd1641007994675ca976a2a687299c0ba"
-  version "0.3.39"
+  url "https://github.com/clickbrain/vllm-mlx-ui/archive/refs/tags/v0.3.41.tar.gz"
+  sha256 "0f61fd2db09bec7983f78a2210b0e2f86db015357def16ed6007e72f271e21d4"
+  version "0.3.41"
 
   # HEAD install: always gets the latest code from main branch.
   # Install with:  brew install --HEAD clickbrain/vllm-mlx-ui/vllm-mlx-ui
@@ -98,16 +98,28 @@ class VllmMlxUi < Formula
     python = venv/"bin/python3"
     model  = "mlx-community/Llama-3.2-3B-Instruct-4bit"
 
-    ohai "Downloading starter model: #{model} (~1.8 GB)"
-    ohai "This happens once. Grab a coffee ☕ — it takes a few minutes."
+    # HuggingFace caches models under ~/.cache/huggingface/hub/models--<org>--<name>.
+    # On upgrades the model is already present — skip the download to avoid
+    # lock-file permission errors when another process holds the cache.
+    model_cache_dir = Pathname("#{Dir.home}/.cache/huggingface/hub") \
+                      / "models--mlx-community--Llama-3.2-3B-Instruct-4bit"
 
-    # Download the model into the default HuggingFace cache
-    system python, "-c", <<~PY
-      from huggingface_hub import snapshot_download
-      snapshot_download("#{model}")
-    PY
+    if model_cache_dir.exist?
+      ohai "Starter model already present — skipping download."
+    else
+      ohai "Downloading starter model: #{model} (~1.8 GB)"
+      ohai "This happens once. Grab a coffee ☕ — it takes a few minutes."
 
-    # Write the default config so the UI knows which model to use immediately
+      system python, "-c", <<~PY
+        from huggingface_hub import snapshot_download
+        snapshot_download("#{model}")
+      PY
+
+      ohai "Starter model ready! Run: vllm-mlx-ui"
+    end
+
+    # Always write the default config on first install (idempotent — won't
+    # overwrite an existing config so user settings survive upgrades).
     config_dir = Pathname("#{Dir.home}/.vllm_mlx_ui")
     config_dir.mkpath
     config_file = config_dir/"server_config.json"
@@ -120,8 +132,6 @@ class VllmMlxUi < Formula
         "context_size" => 8192,
       }))
     end
-
-    ohai "Starter model ready! Run: vllm-mlx-ui"
   end
 
   # ── Post-install message ──────────────────────────────────
