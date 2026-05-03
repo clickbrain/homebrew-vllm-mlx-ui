@@ -15,9 +15,9 @@ class VllmMlxUi < Formula
   homepage "https://github.com/clickbrain/vllm-mlx-ui"
 
   # Stable release — brew upgrade works normally with this URL.
-  url "https://github.com/clickbrain/vllm-mlx-ui/archive/refs/tags/v0.3.41.tar.gz"
-  sha256 "0f61fd2db09bec7983f78a2210b0e2f86db015357def16ed6007e72f271e21d4"
-  version "0.3.41"
+  url "https://github.com/clickbrain/vllm-mlx-ui/archive/refs/tags/v0.5.1.tar.gz"
+  sha256 "61f5d659dc1fb3f787738c6b7e41418c0c48fe08aa2c5bd361f56434d6eda23d"
+  version "0.5.1"
 
   # HEAD install: always gets the latest code from main branch.
   # Install with:  brew install --HEAD clickbrain/vllm-mlx-ui/vllm-mlx-ui
@@ -46,6 +46,10 @@ class VllmMlxUi < Formula
     # Sync built dist into the Python package directory so pip picks it up
     FileUtils.rm_rf "vllm_mlx/dashboard/ui_dist"
     FileUtils.cp_r "ui/dist", "vllm_mlx/dashboard/ui_dist"
+
+    # Bundle docs so the in-app docs viewer works in the installed version
+    FileUtils.rm_rf "vllm_mlx/dashboard/docs_dist"
+    FileUtils.cp_r "docs", "vllm_mlx/dashboard/docs_dist"
 
     # Create an isolated virtual environment
     system python, "-m", "venv", venv
@@ -144,6 +148,14 @@ class VllmMlxUi < Formula
 
       The browser opens automatically at http://127.0.0.1:8502
       Click ▶ Start Server on the Serve page — the model loads in ~30s.
+
+      To upgrade:
+          brew update && brew upgrade vllm-mlx-ui
+
+      Note: `brew upgrade` alone may not see new releases for up to 24 hours
+      due to Homebrew's auto-update throttle. Always use `brew update` first,
+      or add this to your ~/.zshenv to reduce the throttle to 5 minutes:
+          export HOMEBREW_AUTO_UPDATE_SECS=300
 
       Docs & source:  https://github.com/clickbrain/vllm-mlx-ui
     EOS
