@@ -5,9 +5,9 @@ class VllmMlxUi < Formula
   desc "Apple Silicon LLM inference server with browser-based dashboard UI"
   homepage "https://github.com/clickbrain/vllm-mlx-ui"
 
-  url "https://github.com/clickbrain/vllm-mlx-ui/archive/refs/tags/v0.8.8.tar.gz"
-  sha256 "ec8d51ba4282f27922f03b685b878977fc20665f39dadf220d8ffdad8c1bcbde"
-  version "0.8.8"
+  url "https://github.com/clickbrain/vllm-mlx-ui/archive/refs/tags/v0.8.9.tar.gz"
+  sha256 "e06300a1b0c02e3e6ae41e73dc5be47422261e1414ee07f4a747b7aba7353431"
+  version "0.8.9"
 
   head "https://github.com/clickbrain/vllm-mlx-ui.git", branch: "main"
 
