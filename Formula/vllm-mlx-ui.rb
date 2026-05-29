@@ -5,9 +5,9 @@ class VllmMlxUi < Formula
   desc "Apple Silicon LLM inference server with browser-based dashboard UI"
   homepage "https://github.com/clickbrain/vllm-mlx-ui"
 
-  url "https://github.com/clickbrain/vllm-mlx-ui/archive/refs/tags/v0.8.72.tar.gz"
-  sha256 "36bc576b4533a46c0e15dad413023516b851c15883e3b14ddb98caee2a6447bd"
-  version "0.8.72"
+  url "https://github.com/clickbrain/vllm-mlx-ui/archive/refs/tags/v0.8.73.tar.gz"
+  sha256 "2c7094d63a7db69e21d9cd8baac9f6f8c251c4ce308160ee061b59be8d95096b"
+  version "0.8.73"
 
   head "https://github.com/clickbrain/vllm-mlx-ui.git", branch: "main"
 
@@ -33,12 +33,14 @@ class VllmMlxUi < Formula
     system venv/"bin/pip", "install", "--upgrade", "pip"
     system venv/"bin/pip", "install", "."
 
-    system venv/"bin/pip", "install", "--upgrade",
-           "vllm-mlx>=0.1.0",
-           "mlx-lm>=0.31.0",
-           "huggingface-hub>=0.23.0"
+    # Remove stale vllm-mlx PyPI package if present from a previous install.
+    # It shares the vllm_mlx namespace and causes confusion; rapid-mlx is the engine.
+    system venv/"bin/pip", "uninstall", "-y", "vllm-mlx"
 
-    %w[vllm-mlx vllm-mlx-ui vllm-mlx-chat vllm-mlx-bench].each do |cmd|
+    # Install rapid-mlx as the primary local inference engine.
+    system venv/"bin/pip", "install", "--upgrade", "rapid-mlx"
+
+    %w[vllm-mlx-ui rapid-mlx].each do |cmd|
       next unless (venv/"bin"/cmd).exist?
       (bin/cmd).write <<~SH
         #!/bin/bash
@@ -74,18 +76,20 @@ class VllmMlxUi < Formula
     config_file = config_dir/"server_config.json"
     unless config_file.exist?
       config_file.write(JSON.generate({
-        "model"        => model,
-        "port"         => 8080,
-        "host"         => "127.0.0.1",
-        "max_tokens"   => 4096,
-        "context_size" => 8192,
+        "config_version" => 3,
+        "engine_id"      => "rapid-mlx",
+        "model"          => model,
+        "port"           => 8000,
+        "host"           => "127.0.0.1",
+        "max_tokens"     => 32768,
+        "proxy_default_max_tokens" => 0,
       }))
     end
   end
 
   def caveats
     <<~EOS
-      ✅  vllm-mlx is installed with a starter model ready to use.
+      ✅  vllm-mlx-ui is installed with Rapid-MLX as the inference engine.
 
       Start the dashboard:
           vllm-mlx-ui
