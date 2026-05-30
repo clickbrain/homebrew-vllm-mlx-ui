@@ -15,9 +15,9 @@ class VllmMlxUi < Formula
   homepage "https://github.com/clickbrain/vllm-mlx-ui"
 
   # Stable release — brew upgrade works normally with this URL.
-  url "https://github.com/clickbrain/vllm-mlx-ui/archive/refs/tags/v0.8.76.tar.gz"
-  sha256 "fd785a5502aa6e979285e0117f50d1155b3f5a54c78e7826d10894578f02df93"
-  version "0.8.76"
+  url "https://github.com/clickbrain/vllm-mlx-ui/archive/refs/tags/v0.8.78.tar.gz"
+  sha256 "5aee445774d8fc72f66064fd04bfaa99641eb31c55fcabae0209ee6eb5a0cf96"
+  version "0.8.78"
 
   # HEAD install: always gets the latest code from main branch.
   # Install with:  brew install --HEAD clickbrain/vllm-mlx-ui/vllm-mlx-ui
@@ -118,13 +118,18 @@ class VllmMlxUi < Formula
     config_file = config_dir/"server_config.json"
     unless config_file.exist?
       config_file.write(JSON.generate({
-        "config_version"           => 3,
+        "config_version"           => 4,
         "engine_id"                => "rapid-mlx",
         "model"                    => "qwen3.5-9b",
         "port"                     => 8000,
         "host"                     => "127.0.0.1",
         "max_tokens"               => 32768,
-        "proxy_default_max_tokens" => 0,
+        "proxy_default_max_tokens" => 32768,
+        "engine_settings"          => {
+          "rapid-mlx" => {
+            "gpu_memory_utilization" => 0.85,
+          },
+        },
       }))
     end
   end
